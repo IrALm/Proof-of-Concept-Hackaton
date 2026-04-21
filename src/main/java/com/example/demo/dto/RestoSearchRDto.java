@@ -21,6 +21,8 @@ public record RestoSearchRDto(
         @Max(value = 180, message = "Longitude must be <= 180")
         Double longitude,
 
+        Boolean newOnly,
+
         @PositiveOrZero(message = "Radius must be >= 0")
         Double radius,
         Integer page,

@@ -108,4 +108,101 @@ public interface RestoRepository extends JpaRepository<Restaurant, Long> {
             @Param("limit") int limit,
             @Param("offset") int offset
     );
+
+    @Query(value = """
+    SELECT
+        r.id,
+        r.name,
+        r.location,
+        r.cuisine,
+        r.price,
+        r.rating,
+        r.review_count,
+        r.photo_url,
+        r.award,
+        r.green_star,
+        r.latitude,
+        r.longitude,
+
+        (
+            COALESCE(r.rating, 0) * 3 +
+            LOG(GREATEST(r.review_count, 1)) * 2 +
+            (
+                CASE
+                    WHEN :lat IS NOT NULL AND :lng IS NOT NULL THEN
+                        (1 / (1 + ST_Distance(
+                            ST_SetSRID(ST_MakePoint(r.longitude, r.latitude), 4326)::geography,
+                            ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography
+                        ) / 1000.0))
+                    ELSE 0
+                END
+            ) * 5
+        ) AS score
+
+    FROM restaurants r
+
+    WHERE
+        :lat IS NOT NULL AND :lng IS NOT NULL
+
+        AND (
+            :radius IS NULL OR
+            ST_DWithin(
+                ST_SetSRID(ST_MakePoint(r.longitude, r.latitude), 4326)::geography,
+                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                :radius
+            )
+        )
+
+    ORDER BY
+        score DESC,
+        r.rating DESC,
+        r.review_count DESC
+
+    LIMIT :limit
+    OFFSET :offset
+""", nativeQuery = true)
+    List<Object[]> findRecommendationsAroundMe(
+            @Param("lat") Double lat,
+            @Param("lng") Double lng,
+            @Param("radius") Double radius,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
+
+    @Query(value = """
+    SELECT
+        r.id,
+        r.name,
+        r.location,
+        r.cuisine,
+        r.price,
+        r.rating,
+        r.review_count,
+        r.photo_url,
+        r.award,
+        r.green_star,
+        r.latitude,
+        r.longitude,
+
+        (
+            COALESCE(r.rating, 0) * 3 +
+            LOG(GREATEST(r.review_count, 1)) * 2
+        ) AS score
+
+    FROM restaurants r
+
+    WHERE
+        r.created_at >= NOW() - INTERVAL '7 days'
+
+    ORDER BY
+        r.created_at DESC,
+        score DESC
+
+    LIMIT :limit
+    OFFSET :offset
+""", nativeQuery = true)
+    List<Object[]> findNewRestaurants(
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
 }

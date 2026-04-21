@@ -18,17 +18,47 @@ public class RestoSearchService {
     public List<RestoSearchResultDto> search(RestoSearchRDto dto) {
 
         boolean hasFilters = hasAnyFilter(dto);
-
         List<Object[]> results;
 
-        if (!hasFilters) {
-            // 🏠 HOME FEED MODE
+        // 🆕 PRIORITÉ 1 : NOUVEAUTÉS (7 derniers jours)
+        if (isNewFeedRequest(dto)) {
+
+            results = repo.findNewRestaurants(
+                    safeLimit(dto),
+                    safeOffset(dto)
+            );
+
+        }
+        // 🌍 PRIORITÉ 2 : recommandations autour de moi
+        else if (dto.latitude() != null && dto.longitude() != null
+                && dto.name() == null
+                && dto.location() == null
+                && dto.cuisine() == null
+                && dto.greenStar() == null
+                && dto.award() == null
+                && dto.price() == null) {
+
+            results = repo.findRecommendationsAroundMe(
+                    dto.latitude(),
+                    dto.longitude(),
+                    dto.radius(),
+                    safeLimit(dto),
+                    safeOffset(dto)
+            );
+
+        }
+        // 🏠 HOME FEED MODE
+        else if (!hasFilters) {
+
             results = repo.findHomeFeed(
                     safeLimit(dto),
                     safeOffset(dto)
             );
-        } else {
-            // 🔎 SEARCH MODE
+
+        }
+        // 🔎 SEARCH MODE
+        else {
+
             results = repo.searchRestaurants(
                     dto.name(),
                     dto.location(),
@@ -78,6 +108,12 @@ public class RestoSearchService {
             return dto.page() * dto.size();
         }
         return 0;
+    }
+
+    private boolean isNewFeedRequest(RestoSearchRDto dto) {
+        return Boolean.TRUE.equals(dto.newOnly())
+                || "new".equalsIgnoreCase(dto.sortBy())
+                || "recent".equalsIgnoreCase(dto.sortBy());
     }
 
     // ─────────────────────────────────────
