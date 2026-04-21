@@ -16,6 +16,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY}
+      base-url: https://api.groq.com/openai
+      chat:
+        options:
+          model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+          temperature: 0.35
 
 app:
   supabase:

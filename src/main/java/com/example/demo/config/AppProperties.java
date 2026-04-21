@@ -1,10 +1,11 @@
 package com.example.demo.config;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
 @Getter
-@Builder
+@Setter
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
     private Supabase supabase;
@@ -13,36 +14,30 @@ public class AppProperties {
     private Api api;
 
     @Getter
-    @Builder
+    @Setter
     public static class Supabase {
         private String url;
         private String key;
         private String anonKey;
         private String serviceKey;
-        // getters/setters
     }
 
     @Getter
-    @Builder
+    @Setter
     public static class Groq {
         private String apiKey;
-        // getters/setters
     }
 
     @Getter
-    @Builder
+    @Setter
     public static class Pexels {
         private String apiKey;
-        // getters/setters
     }
 
     @Getter
-    @Builder
+    @Setter
     public static class Api {
         private String url;
-        // getters/setters
     }
-
-    // getters/setters
 }
 

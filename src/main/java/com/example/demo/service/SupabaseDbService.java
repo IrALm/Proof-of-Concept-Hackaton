@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.config.AppProperties;
+import com.example.demo.dto.UserProfileDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -34,5 +36,32 @@ public class SupabaseDbService {
                 ))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    public UserProfileDto findUserById(String id) {
+        List<Map> rows = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users")
+                        .queryParam("id", "eq." + id)
+                        .queryParam("select", "id,email,full_name")
+                        .build())
+                .retrieve()
+                .body(List.class);
+
+        if (rows == null || rows.isEmpty()) {
+            return null;
+        }
+
+        Map firstRow = rows.get(0);
+
+        return new UserProfileDto(
+                valueAsString(firstRow.get("id")),
+                valueAsString(firstRow.get("email")),
+                valueAsString(firstRow.get("full_name"))
+        );
+    }
+
+    private String valueAsString(Object value) {
+        return value == null ? null : value.toString();
     }
 }

@@ -1,6 +1,6 @@
 package com.example.demo.supabaseAuth;
 
-import tools.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;

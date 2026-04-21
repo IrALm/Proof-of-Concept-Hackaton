@@ -44,7 +44,7 @@ public class SupabaseJwtService {
         }
 
         String body = restClient.get()
-                .uri("/auth/v1/keys")
+                .uri("/auth/v1/.well-known/jwks.json")
                 .retrieve()
                 .body(String.class);
 
@@ -66,7 +66,11 @@ public class SupabaseJwtService {
         }
 
         try {
-            String token = authorizationHeader.replace("Bearer ", "").trim();
+            String token = extractBearerToken(authorizationHeader);
+
+            if (!looksLikeJwt(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization header does not contain a JWT access token");
+            }
 
             String kid = extractKid(token);
             JsonNode jwks = getJwks();
@@ -110,6 +114,18 @@ public class SupabaseJwtService {
         }
     }
 
+    public boolean looksLikeUserJwt(String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return false;
+        }
+
+        try {
+            return looksLikeJwt(extractBearerToken(authorizationHeader));
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
     private String extractKid(String token) {
         try {
             String[] chunks = token.split("\\.");
@@ -123,6 +139,23 @@ public class SupabaseJwtService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String extractBearerToken(String authorizationHeader) {
+        if (!authorizationHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return authorizationHeader.trim();
+        }
+
+        return authorizationHeader.substring(7).trim();
+    }
+
+    private boolean looksLikeJwt(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+
+        String[] parts = token.split("\\.");
+        return parts.length == 3;
     }
 
     private RSAPublicKey buildRsaPublicKey(JsonNode keyNode) throws Exception {
