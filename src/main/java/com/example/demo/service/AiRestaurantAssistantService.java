@@ -7,7 +7,9 @@ import com.example.demo.dto.AiWelcomeResponseDto;
 import com.example.demo.dto.RestoSearchResultDto;
 import com.example.demo.dto.UserProfileDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,6 +34,26 @@ public class AiRestaurantAssistantService {
 
             Regles:
             - Retourne uniquement un objet JSON.
+            - Format attendu a la racine:
+              {
+                "persona": "...",
+                "intentSummary": "...",
+                "responseTone": "...",
+                "name": null,
+                "location": null,
+                "cuisine": null,
+                "greenStar": null,
+                "award": null,
+                "price": null,
+                "latitude": null,
+                "longitude": null,
+                "newOnly": null,
+                "radius": null,
+                "limit": 5,
+                "sortBy": null,
+                "sortDirection": null
+              }
+            - N'utilise pas de cle `filters`.
             - Si l'utilisateur n'a pas donne un filtre, laisse-le a null.
             - `price` doit etre null ou l'une des formes €, €€, €€€, €€€€.
             - `sortBy` doit etre null, score, new ou recent.
@@ -158,9 +180,49 @@ public class AiRestaurantAssistantService {
 
     private <T> T readJsonResponse(String rawContent, Class<T> targetType) {
         try {
-            return objectMapper.readValue(extractJson(rawContent), targetType);
+            String normalizedJson = normalizeJsonForTarget(extractJson(rawContent), targetType);
+            return objectMapper.readValue(normalizedJson, targetType);
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI response could not be parsed as JSON", e);
+        }
+    }
+
+    private <T> String normalizeJsonForTarget(String rawJson, Class<T> targetType) throws JsonProcessingException {
+        if (!AiSearchIntentDto.class.equals(targetType)) {
+            return rawJson;
+        }
+
+        JsonNode root = objectMapper.readTree(rawJson);
+        if (!root.isObject()) {
+            return rawJson;
+        }
+
+        JsonNode filtersNode = root.get("filters");
+        if (filtersNode == null || !filtersNode.isObject()) {
+            return rawJson;
+        }
+
+        ObjectNode merged = objectMapper.createObjectNode();
+        merged.setAll((ObjectNode) filtersNode);
+
+        copyIfPresent(root, merged, "persona");
+        copyIfPresent(root, merged, "intentSummary");
+        copyIfPresent(root, merged, "responseTone");
+        copyIfPresent(root, merged, "latitude");
+        copyIfPresent(root, merged, "longitude");
+        copyIfPresent(root, merged, "radius");
+        copyIfPresent(root, merged, "limit");
+        copyIfPresent(root, merged, "sortBy");
+        copyIfPresent(root, merged, "sortDirection");
+        copyIfPresent(root, merged, "newOnly");
+
+        return objectMapper.writeValueAsString(merged);
+    }
+
+    private void copyIfPresent(JsonNode source, ObjectNode target, String fieldName) {
+        JsonNode value = source.get(fieldName);
+        if (value != null && !value.isMissingNode()) {
+            target.set(fieldName, value);
         }
     }
 
@@ -290,7 +352,7 @@ public class AiRestaurantAssistantService {
 
     private String displayName(UserProfileDto userProfile) {
         if (userProfile == null) {
-            return "there";
+            return "toi";
         }
 
         if (userProfile.fullName() != null && !userProfile.fullName().isBlank()) {
@@ -301,7 +363,7 @@ public class AiRestaurantAssistantService {
             return userProfile.email().substring(0, userProfile.email().indexOf('@'));
         }
 
-        return "there";
+        return "toi";
     }
 
     private String currentMomentOfDay() {

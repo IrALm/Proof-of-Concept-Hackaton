@@ -1,19 +1,15 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.UserProfileDto;
-import com.example.demo.supabaseAuth.SupabaseJwtService;
-import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Service
 public class UserProfileService {
 
-    private final SupabaseJwtService supabaseJwtService;
     private final SupabaseDbService supabaseDbService;
 
-    public UserProfileService(SupabaseJwtService supabaseJwtService, SupabaseDbService supabaseDbService) {
-        this.supabaseJwtService = supabaseJwtService;
+    public UserProfileService(SupabaseDbService supabaseDbService) {
         this.supabaseDbService = supabaseDbService;
     }
 
@@ -22,25 +18,9 @@ public class UserProfileService {
             return null;
         }
 
-        if (!supabaseJwtService.looksLikeUserJwt(authorizationHeader)) {
-            return null;
-        }
-
         try {
-            Claims claims = supabaseJwtService.verifyJwt(authorizationHeader);
-            String userId = claims.getSubject();
-            UserProfileDto userProfile = supabaseDbService.findUserById(userId);
-
-            if (userProfile != null) {
-                return userProfile;
-            }
-
-            return new UserProfileDto(
-                    userId,
-                    claims.get("email", String.class),
-                    null
-            );
-        } catch (ResponseStatusException ignored) {
+            return supabaseDbService.findAuthUser(authorizationHeader);
+        } catch (RestClientResponseException ignored) {
             return null;
         }
     }

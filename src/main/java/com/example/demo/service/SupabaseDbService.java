@@ -2,6 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.config.AppProperties;
 import com.example.demo.dto.UserProfileDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -63,5 +65,48 @@ public class SupabaseDbService {
 
     private String valueAsString(Object value) {
         return value == null ? null : value.toString();
+    }
+
+    public UserProfileDto findAuthUser(String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return null;
+        }
+
+        JsonNode user = RestClient.builder()
+                .baseUrl(appProperties.getSupabase().getUrl())
+                .defaultHeader("apikey", appProperties.getSupabase().getAnonKey())
+                .build()
+                .get()
+                .uri("/auth/v1/user")
+                .header(HttpHeaders.AUTHORIZATION, authorizationHeader)
+                .retrieve()
+                .body(JsonNode.class);
+
+        if (user == null || user.isMissingNode()) {
+            return null;
+        }
+
+        JsonNode userMetadata = user.path("user_metadata");
+
+        return new UserProfileDto(
+                user.path("id").asText(null),
+                user.path("email").asText(null),
+                firstNonBlank(
+                        user.path("full_name").asText(null),
+                        user.path("name").asText(null),
+                        userMetadata.path("full_name").asText(null),
+                        userMetadata.path("name").asText(null),
+                        userMetadata.path("display_name").asText(null)
+                )
+        );
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank() && !"null".equalsIgnoreCase(value)) {
+                return value;
+            }
+        }
+        return null;
     }
 }
