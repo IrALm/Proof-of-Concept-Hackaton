@@ -1,0 +1,189 @@
+{
+  "info": {
+    "_postman_id": "db1f4527-0210-46b6-bbd3-4c635b0c351e",
+    "name": "hackaton",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48027227"
+  },
+  "item": [
+    {
+      "name": "sign up",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"test@mail.com\",\r\n  \"password\": \"12345678\",\r\n  \"fullName\": \"Test User\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/auth/signup",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "auth",
+            "signup"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n   \"email\": \"test50@mail.com\",\r\n  \"password\": \"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "logout",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9QUk9QUklFVEFJUkUiLCJzdWIiOiJrYmcuYWwucHJAZ21haWwuY29tIiwiaWF0IjoxNzc0MzExMzU1LCJleHAiOjE3NzQzMTE2NTV9.auqTFgyzuRHqMa_pRSgp9J-Qsg6QTJNks6CkiKtBkuc",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/auth/logout",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "search",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"latitude\": 47.2833,\r\n  \"longitude\": -2.2,\r\n  \"radius\": 3000\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/restaurants/search",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "restaurants",
+            "search"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "welcome",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/ai/welcome",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "welcome"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "search with AI",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwY2IwMjUwLWFjNjItNGJlMy1iNDhkLWQyZjMxMDE3MTRlMCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BhdWhicGZucGVsY2hia2F3amhoLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI2N2Y5NjQwMC05MDdjLTRkNDgtYTI1Yi1mYTBmMzM5MTZlZDYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc2NzgwMjAyLCJpYXQiOjE3NzY3NzY2MDIsImVtYWlsIjoidGVzdDUwQG1haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3Q1MEBtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjY3Zjk2NDAwLTkwN2MtNGQ0OC1hMjViLWZhMGYzMzkxNmVkNiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzc2Nzc2NjAyfV0sInNlc3Npb25faWQiOiI0MzUwZmQwYS04N2M0LTQ2MjAtYTQ1ZS03ODFkMzQ3OTkzNTAiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.9R-pN_x0B302sBKgFpCCRVibU9QJrln93xwkA_7OhT7oOgtcnT83Lj5l5GUnFb2cXKDHUg0ymjbAJuP111ijIA",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"message\": \"sushi à Paris\",\r\n  \"latitude\": 48.8566,\r\n  \"longitude\": 2.3522\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/ai/search",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "search"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
