@@ -345,6 +345,128 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Planned Travel With AI",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"message\": \"Je veux un week-end romantique à Rome la semaine prochaine, propose-moi un bon hôtel et des restos sympa\",\r\n  \"latitude\": 48.8566,\r\n  \"longitude\": 2.3522\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/ai/travel/plan",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "travel",
+            "plan"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "start AI",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "POST http://localhost:8080/ai/profile/start",
+          "protocol": "POST http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "ai",
+            "profile",
+            "start"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "chat AI",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwY2IwMjUwLWFjNjItNGJlMy1iNDhkLWQyZjMxMDE3MTRlMCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BhdWhicGZucGVsY2hia2F3amhoLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI5ZjM3NWQyMi04OWFlLTRkZmQtYjFkOS02NzU0Y2Y1MDI3MjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc2ODY2NTExLCJpYXQiOjE3NzY4NjI5MTEsImVtYWlsIjoidGVzdDMwQG1haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3QzMEBtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJKZWFuIER1cG9udCIsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiOWYzNzVkMjItODlhZS00ZGZkLWIxZDktNjc1NGNmNTAyNzI5In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NzY4NjI5MTF9XSwic2Vzc2lvbl9pZCI6IjIzNmQwZjQyLWRjNzctNDVhOS04Y2I3LTEwMmY2NTdjZmE4NSIsImlzX2Fub255bW91cyI6ZmFsc2V9.UftTmbr2vwOS3neZ-JprvHfoEG3ytmgJtcY5NBKVCNYvQqmEM6UqNlXHaNi5kbdqJJVECtFlFQpENFX4kIsQpw",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/ai/profile/chat",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "profile",
+            "chat"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "SAve AI",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwY2IwMjUwLWFjNjItNGJlMy1iNDhkLWQyZjMxMDE3MTRlMCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3BhdWhicGZucGVsY2hia2F3amhoLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI5ZjM3NWQyMi04OWFlLTRkZmQtYjFkOS02NzU0Y2Y1MDI3MjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc2ODY2NTExLCJpYXQiOjE3NzY4NjI5MTEsImVtYWlsIjoidGVzdDMwQG1haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3QzMEBtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJKZWFuIER1cG9udCIsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiOWYzNzVkMjItODlhZS00ZGZkLWIxZDktNjc1NGNmNTAyNzI5In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NzY4NjI5MTF9XSwic2Vzc2lvbl9pZCI6IjIzNmQwZjQyLWRjNzctNDVhOS04Y2I3LTEwMmY2NTdjZmE4NSIsImlzX2Fub255bW91cyI6ZmFsc2V9.UftTmbr2vwOS3neZ-JprvHfoEG3ytmgJtcY5NBKVCNYvQqmEM6UqNlXHaNi5kbdqJJVECtFlFQpENFX4kIsQpw",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"preferences\": {\r\n    \"restaurants\": {\r\n      \"cuisines\": [\"italienne\", \"japonaise\"],\r\n      \"priceRange\": [\"€€\", \"€€€\"],\r\n      \"atmosphere\": [\"cosy\"],\r\n      \"dietaryRestrictions\": []\r\n    },\r\n    \"hotels\": {\r\n      \"amenities\": [\"piscine\", \"spa\"],\r\n      \"tripTypes\": [\"romantique\"],\r\n      \"budgetLevel\": \"medium\",\r\n      \"preferredSegments\": []\r\n    },\r\n    \"travel\": {\r\n      \"favoriteDestinations\": [\"Rome\", \"Tokyo\"],\r\n      \"travelStyle\": \"spontané\"\r\n    }\r\n  }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/ai/profile/save",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "profile",
+            "save"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
