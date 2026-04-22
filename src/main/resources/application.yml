@@ -40,3 +40,7 @@ app:
 
   api:
     url: ${API_URL}
+  cors:
+    allowed-origins:
+      - http://localhost:5173          # dev local
+      - https://ton-app.vercel.app     # production

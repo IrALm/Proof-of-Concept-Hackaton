@@ -1,8 +1,11 @@
 package com.example.demo.config;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,6 +41,14 @@ public class AppProperties {
     @Setter
     public static class Api {
         private String url;
+    }
+
+    // Dans AppProperties.java, ajouter :
+    private Cors cors = new Cors();
+
+    @Data
+    public static class Cors {
+        private List<String> allowedOrigins = List.of("http://localhost:3000");
     }
 }
 
