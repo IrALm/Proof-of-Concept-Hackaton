@@ -1,0 +1,89 @@
+name: CI Fullstack Spring
+
+on:
+  push:
+    branches: [ "main", "develop", "feature/**" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-test-docker:
+    name: 🚀 Build | 🧪 Tests | 🐳 Docker
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: 1
+
+    steps:
+      # -----------------------------
+      # Checkout
+      # -----------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # -----------------------------
+      # PostgreSQL + PostGIS
+      # -----------------------------
+      - name: Start PostGIS
+        run: |
+          docker run -d \
+            --name postgres \
+            -e POSTGRES_USER=test \
+            -e POSTGRES_PASSWORD=test \
+            -e POSTGRES_DB=test_db \
+            -p 5432:5432 \
+            postgis/postgis:15-3.4-alpine
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            if PGPASSWORD=test psql -h localhost -U test -d test_db -c "SELECT 1" > /dev/null 2>&1; then
+              echo "✅ Postgres prêt"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ Postgres KO"
+          docker logs postgres
+          exit 1
+
+      # -----------------------------
+      # Java
+      # -----------------------------
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # -----------------------------
+      # Variables d'environnement
+      # -----------------------------
+      - name: Set ENV
+        run: |
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/test_db" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=test" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=test" >> $GITHUB_ENV
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop" >> $GITHUB_ENV
+          echo "SPRING_FLYWAY_ENABLED=false" >> $GITHUB_ENV
+
+          # Mock Groq API
+          echo "GROQ_API_KEY=fake-key-for-ci" >> $GITHUB_ENV
+
+      # -----------------------------
+      # Build
+      # -----------------------------
+      - name: Build
+        run: mvn clean install -DskipTests
+
+      # -----------------------------
+      # Tests
+      # -----------------------------
+      - name: Tests
+        run: mvn test -Dspring.profiles.active=test
+
+      # -----------------------------
+      # Docker build
+      # -----------------------------
+      - name: Build Docker image
+        run: docker build -t app-ci-test .
