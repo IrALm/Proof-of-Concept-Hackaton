@@ -184,6 +184,167 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "search hotel",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Hilton\",\r\n  \"country\": \"France\",\r\n  \"marketSegment\": \"Online TA\",\r\n  \"minRating\": 4.2,\r\n  \"maxAdr\": 150.0,\r\n  \"customerType\": \"Transient\",\r\n  \"isRepeatedGuest\": true,\r\n  \"familyFriendly\": true,\r\n  \"businessFriendly\": false,\r\n  \"lowCancellation\": true,\r\n  \"newOnly\": false,\r\n  \"page\": 0,\r\n  \"size\": 10,\r\n  \"limit\": 10,\r\n  \"offset\": 0,\r\n  \"sortBy\": \"rating\",\r\n  \"sortDirection\": \"desc\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/hotels/search",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "hotels",
+            "search"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "home hotel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/hotels/home",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "hotels",
+            "home"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "new hotel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/hotels/new",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "hotels",
+            "new"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "recommandation family",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/recommended/family",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "recommended",
+            "family"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "recommend business",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/hotels/recommended/business",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "hotels",
+            "recommended",
+            "business"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "welcome ai hotel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/ai/hotels/welcome",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "hotels",
+            "welcome"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "search hotel with ai",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"message\": \"Je veux un hôtel sympa \"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/ai/hotels/search",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ai",
+            "hotels",
+            "search"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
