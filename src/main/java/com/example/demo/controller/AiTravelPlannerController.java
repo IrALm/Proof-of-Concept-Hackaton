@@ -22,11 +22,36 @@ public class AiTravelPlannerController {
     }
 
     /**
-     * Natural-language travel planning endpoint.
+     * Opens the travel planning conversation.
      *
-     * <p>Accepts a freeform user message and optional geolocation context.
-     * Returns either a clarification question or a full trip proposal
-     * (hotel + restaurants + narrative).
+     * <p>Returns a welcome message + starter quick-reply chips without
+     * consuming any Groq tokens (hardcoded, optionally personalized with
+     * the user's first name). Mirrors {@code /ai/profile/start}.
+     *
+     * <pre>
+     * POST /ai/travel/start
+     * Authorization: Bearer &lt;token&gt;  (optional — enables name personalization)
+     * </pre>
+     */
+    @PostMapping("/start")
+    public ResponseEntity<AiTravelPlanResponseDto> start(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
+    ) {
+        return ResponseEntity.ok(plannerService.start(authorizationHeader));
+    }
+
+    /**
+     * Processes one turn of the travel planning conversation.
+     *
+     * <p>Behavior driven by {@code isReadyToPlan} in the response:
+     * <ul>
+     *   <li>{@code false} → the IA asks a short clarifying question, frontend
+     *       keeps chatting and appends to {@code history}.</li>
+     *   <li>{@code true}  → the IA has enough info; the backend has already
+     *       run the hotel + restaurant search and the narrative step. The
+     *       final plan is returned in the SAME response — no extra call
+     *       needed.</li>
+     * </ul>
      *
      * <pre>
      * POST /ai/travel/plan
@@ -34,8 +59,12 @@ public class AiTravelPlannerController {
      *
      * {
      *   "message": "Je veux un week-end romantique a Rome la semaine prochaine",
-     *   "latitude": 48.8566,
-     *   "longitude": 2.3522,
+     *   "history": [
+     *     { "role": "assistant", "content": "Salut ! Tu penses a quelle destination ?" },
+     *     { "role": "user",      "content": "Je veux un week-end romantique a Rome la semaine prochaine" }
+     *   ],
+     *   "latitude": 47.2184,
+     *   "longitude": -1.5536,
      *   "limit": 5
      * }
      * </pre>
@@ -45,7 +74,6 @@ public class AiTravelPlannerController {
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody AiTravelPlanRequestDto request
     ) {
-        AiTravelPlanResponseDto response = plannerService.plan(authorizationHeader, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(plannerService.plan(authorizationHeader, request));
     }
 }
