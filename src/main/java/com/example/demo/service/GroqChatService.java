@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class GroqChatService {
 
-    private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
+    private static final String DEFAULT_MODEL = "llama-3.1-8b-instant";
 
     private final RestClient restClient;
     private final String model;

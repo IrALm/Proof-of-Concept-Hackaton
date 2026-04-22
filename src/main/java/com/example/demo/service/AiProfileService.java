@@ -1,12 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.AiProfileChatRequestDto;
-import com.example.demo.dto.AiProfileChatResponseDto;
-import com.example.demo.dto.AiProfileConversationMessageDto;
-import com.example.demo.dto.AiProfilePreferencesDto;
-import com.example.demo.dto.AiProfileSaveRequestDto;
-import com.example.demo.dto.AiProfileSaveResponseDto;
-import com.example.demo.dto.UserProfileDto;
+import com.example.demo.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;

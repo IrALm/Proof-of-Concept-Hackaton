@@ -22,7 +22,7 @@ spring:
       base-url: https://api.groq.com/openai
       chat:
         options:
-          model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+          model: ${GROQ_MODEL:llama-3.1-8b-instant}
           temperature: 0.35
 
 app:

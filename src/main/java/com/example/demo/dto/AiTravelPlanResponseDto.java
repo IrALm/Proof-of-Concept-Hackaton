@@ -3,44 +3,47 @@ package com.example.demo.dto;
 import java.util.List;
 
 /**
- * Unified response for the travel planner endpoint.
+ * Unified response for {@code POST /ai/travel/plan}.
  *
- * <p>Two possible states driven by {@code status}:
+ * <p>Exact same pattern as {@code AiProfileChatResponseDto}: the IA decides,
+ * turn by turn, whether it has collected enough info. Two possible shapes
+ * driven by {@code isReadyToPlan}:
+ *
  * <ul>
- *   <li>{@code "clarification_needed"} — the prompt was too vague; only
- *       {@code message} and {@code missingFields} are populated.</li>
- *   <li>{@code "plan_ready"} — a complete trip proposal; {@code summary},
- *       {@code greeting}, {@code assistantMessage}, {@code suggestedFollowUps},
- *       {@code hotel} and {@code restaurants} are populated.</li>
+ *   <li>{@code isReadyToPlan = false} — the IA is still gathering info;
+ *       only {@code message} and {@code suggestedReplies} are populated.
+ *       The frontend shows the question + chips and keeps calling
+ *       {@code /plan} with the updated history.</li>
+ *   <li>{@code isReadyToPlan = true}  — the IA has what it needs; the backend
+ *       has already run the hotel + restaurant search and the narrative step.
+ *       {@code greeting}, {@code summary}, {@code assistantMessage},
+ *       {@code hotel}, {@code restaurants} and {@code suggestedReplies} are
+ *       populated. No additional call needed.</li>
  * </ul>
  */
 public record AiTravelPlanResponseDto(
 
-        // ── State ────────────────────────────────────────────────────────────
+        // ── Lifecycle flag ───────────────────────────────────────────────────
         /**
-         * Either {@code "clarification_needed"} or {@code "plan_ready"}.
+         * Whether the IA has collected enough information to trigger a plan.
+         * When {@code true}, the plan branch is populated; otherwise only
+         * the chat branch is.
          */
-        String status,
+        boolean isReadyToPlan,
 
-        // ── Clarification branch ─────────────────────────────────────────────
-        /**
-         * Conversational question returned to the user when clarification is needed.
-         */
+        // ── Always populated ─────────────────────────────────────────────────
+        /** The IA's conversational reply shown to the user. */
         String message,
 
-        /**
-         * Fields that were detected as missing (e.g. {@code ["destination"]}).
-         */
-        List<String> missingFields,
+        /** 2–3 quick-reply suggestions the frontend can display as chips. */
+        List<String> suggestedReplies,
 
-        // ── Plan branch ──────────────────────────────────────────────────────
+        // ── Plan branch (populated only when isReadyToPlan = true) ───────────
         String greeting,
         String persona,
         String intentSummary,
         String summary,
         String assistantMessage,
-        List<String> suggestedFollowUps,
-
         HotelSearchResultDto hotel,
         List<RestoSearchResultDto> restaurants
 
@@ -48,35 +51,42 @@ public record AiTravelPlanResponseDto(
 
     // ── Static factory helpers ───────────────────────────────────────────────
 
-    public static AiTravelPlanResponseDto clarification(String question, List<String> missingFields) {
+    /**
+     * Chat turn when the IA still needs more info from the user.
+     */
+    public static AiTravelPlanResponseDto chatTurn(String message, List<String> suggestedReplies) {
         return new AiTravelPlanResponseDto(
-                "clarification_needed",
-                question,
-                missingFields,
-                null, null, null, null, null, null,
-                null, null
+                false,
+                message,
+                suggestedReplies,
+                null, null, null, null, null, null, null
         );
     }
 
+    /**
+     * Final response once the IA flipped {@code isReadyToPlan} to true and the
+     * backend ran the hotel + restaurant search.
+     */
     public static AiTravelPlanResponseDto plan(
+            String message,
+            List<String> suggestedReplies,
             String greeting,
             String persona,
             String intentSummary,
             String summary,
             String assistantMessage,
-            List<String> suggestedFollowUps,
             HotelSearchResultDto hotel,
             List<RestoSearchResultDto> restaurants
     ) {
         return new AiTravelPlanResponseDto(
-                "plan_ready",
-                null, null,
+                true,
+                message,
+                suggestedReplies,
                 greeting,
                 persona,
                 intentSummary,
                 summary,
                 assistantMessage,
-                suggestedFollowUps,
                 hotel,
                 restaurants
         );
