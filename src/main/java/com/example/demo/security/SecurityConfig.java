@@ -107,7 +107,7 @@ public class SecurityConfig {
         List<String> allowedOrigins = appProperties.getCors().getAllowedOrigins();
         config.setAllowedOrigins(allowedOrigins != null && !allowedOrigins.isEmpty()
                 ? allowedOrigins
-                : List.of("http://localhost:5173") // safe fallback for local dev
+                : List.of("*") // safe fallback for local dev
         );
 
         config.setAllowedMethods(List.of(
