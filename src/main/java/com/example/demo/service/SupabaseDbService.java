@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.config.AppProperties;
+import com.example.demo.dto.AiProfilePreferencesDto;
 import com.example.demo.dto.UserProfileDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +22,7 @@ public class SupabaseDbService {
 
         this.restClient = RestClient.builder()
                 .baseUrl(appProperties.getSupabase().getUrl() + "/rest/v1")
-                .defaultHeader("apikey", appProperties.getSupabase().getServiceKey()) // ⚠️ IMPORTANT
+                .defaultHeader("apikey", appProperties.getSupabase().getServiceKey())
                 .defaultHeader("Authorization", "Bearer " + appProperties.getSupabase().getServiceKey())
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Prefer", "return=minimal")
@@ -63,8 +64,25 @@ public class SupabaseDbService {
         );
     }
 
-    private String valueAsString(Object value) {
-        return value == null ? null : value.toString();
+    /**
+     * Persists the user's AI-generated preferences into the {@code preferences} JSONB column.
+     *
+     * <p>Uses a PATCH with a PostgREST filter on {@code id} so only the target row
+     * is updated. Spring's RestClient serializes {@link AiProfilePreferencesDto}
+     * to a nested JSON object, which Supabase stores as-is in the JSONB column.
+     *
+     * @param userId      the user's UUID (from Supabase auth)
+     * @param preferences the structured preferences to persist
+     */
+    public void updatePreferences(String userId, AiProfilePreferencesDto preferences) {
+        restClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users")
+                        .queryParam("id", "eq." + userId)
+                        .build())
+                .body(Map.of("preferences", preferences))
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public UserProfileDto findAuthUser(String authorizationHeader) {
@@ -99,6 +117,10 @@ public class SupabaseDbService {
                         userMetadata.path("display_name").asText(null)
                 )
         );
+    }
+
+    private String valueAsString(Object value) {
+        return value == null ? null : value.toString();
     }
 
     private String firstNonBlank(String... values) {
