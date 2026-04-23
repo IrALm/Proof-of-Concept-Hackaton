@@ -11,6 +11,7 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -58,6 +59,11 @@ public class HotelBookingController {
 
         Map<String, Object> created = db.insertHotelBooking(payload);
         return ResponseEntity.status(201).body(created);
+    }
+
+    @GetMapping("/email")
+    public List<Map<String, Object>> getReservationsByEmail(@RequestParam String email) {
+        return db.findHotelBookingsByEmail(email);
     }
 
     private static int nz(Integer v) { return v == null ? 0 : v; }

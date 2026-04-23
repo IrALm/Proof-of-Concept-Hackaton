@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,5 +47,10 @@ public class RestaurantReservationController {
 
         Map<String, Object> created = db.insertRestaurantReservation(payload);
         return ResponseEntity.status(201).body(created);
+    }
+
+    @GetMapping("/email")
+    public List<Map<String, Object>> getBookingsByEmail(@RequestParam String email) {
+        return db.findRestaurantReservationsByEmail(email);
     }
 }

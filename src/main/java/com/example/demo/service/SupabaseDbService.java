@@ -225,6 +225,31 @@ public class SupabaseDbService {
         return (result == null || result.isEmpty()) ? null : result.get(0);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> findRestaurantReservationsByEmail(String email) {
+
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/restaurant_reservations")
+                        .queryParam("customer_email", "eq." + email)
+                        .queryParam("order", "created_at.desc")
+                        .build())
+                .retrieve()
+                .body(List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> findHotelBookingsByEmail(String email) {
+
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/hotel_bookings")
+                        .queryParam("email", "eq." + email)
+                        .build())
+                .retrieve()
+                .body(List.class);
+    }
+
     // ═════════════════════════════════════════════════════════════════
     // Helpers
     // ═════════════════════════════════════════════════════════════════
