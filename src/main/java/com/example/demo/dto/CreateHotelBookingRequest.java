@@ -18,5 +18,6 @@ public record CreateHotelBookingRequest(
         String customerType,
         Double adr,
         Integer requiredCarParkingSpaces,
-        Integer totalOfSpecialRequests
+        Integer totalOfSpecialRequests,
+        String email
 ) {}

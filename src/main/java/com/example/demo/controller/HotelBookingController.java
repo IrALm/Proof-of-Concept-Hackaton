@@ -29,6 +29,7 @@ public class HotelBookingController {
         LocalDate arrival = LocalDate.parse(req.arrivalDate());
 
         Map<String, Object> payload = new HashMap<>();
+        payload.put("email" , req.email());
         payload.put("hotel",                       req.hotel());
         payload.put("arrival_date_year",           arrival.getYear());
         payload.put("arrival_date_month",          arrival.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH));
