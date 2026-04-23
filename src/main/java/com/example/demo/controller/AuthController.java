@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.SignupRequest;
+import com.example.demo.dto.UserProfileDto;
 import com.example.demo.supabaseAuth.SupabaseAuthService;
 import com.example.demo.service.SupabaseDbService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -129,5 +130,25 @@ public class AuthController {
         return ResponseEntity.ok(Map.of(
                 "message", "Déconnexion réussie"
         ));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileDto> getCurrentUser(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        // Extraction du token Bearer
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        UserProfileDto user = dbService.findUserByToken(token);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(user);
     }
 }

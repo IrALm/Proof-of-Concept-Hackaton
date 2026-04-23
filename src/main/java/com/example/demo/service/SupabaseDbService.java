@@ -45,26 +45,66 @@ public class SupabaseDbService {
                 .toBodilessEntity();
     }
 
-    public UserProfileDto findUserById(String id) {
-        List<Map> rows = restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/users")
-                        .queryParam("id", "eq." + id)
-                        .queryParam("select", "id,email,full_name")
-                        .build())
-                .retrieve()
-                .body(List.class);
+    public UserProfileDto findUserByToken(String accessToken) {
 
-        if (rows == null || rows.isEmpty()) {
+        String supabaseAnonKey = "sb_publishable_hOvgbgZG6112bFo1vmAA1Q_zAq5F5Dj";
+
+        // ===== 1. AUTH =====
+        RestClient authClient = RestClient.builder()
+                .baseUrl("https://pauhbpfnpelchbkawjhh.supabase.co/auth/v1")
+                .build();
+
+        Map<String, Object> user = authClient.get()
+                .uri("/user")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("apikey", supabaseAnonKey)
+                .retrieve()
+                .body(Map.class);
+
+        if (user == null) {
             return null;
         }
 
-        Map firstRow = rows.get(0);
+        String id = valueAsString(user.get("id"));
+        String email = valueAsString(user.get("email"));
+
+        Map<String, Object> userMetadata =
+                (Map<String, Object>) user.get("user_metadata");
+
+        String fullName = userMetadata != null
+                ? valueAsString(userMetadata.get("full_name"))
+                : null;
+
+        // ===== 2. DB (preferences depuis table users) =====
+        RestClient dbClient = RestClient.builder()
+                .baseUrl("https://pauhbpfnpelchbkawjhh.supabase.co/rest/v1")
+                .build();
+
+        List<Map<String, Object>> rows = dbClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users")
+                        .queryParam("id", "eq." + id)
+                        .queryParam("select", "preferences")
+                        .build())
+                .header("apikey", supabaseAnonKey)
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .body(List.class);
+
+// 🔍 DEBUG RAW
+        System.out.println("RAW DB RESPONSE: " + rows);
+
+        Map<String, Object> preferences = null;
+
+        if (rows != null && !rows.isEmpty()) {
+            preferences = (Map<String, Object>) rows.get(0).get("preferences");
+        }
 
         return new UserProfileDto(
-                valueAsString(firstRow.get("id")),
-                valueAsString(firstRow.get("email")),
-                valueAsString(firstRow.get("full_name"))
+                id,
+                email,
+                fullName,
+                preferences
         );
     }
 
@@ -109,8 +149,8 @@ public class SupabaseDbService {
                         userMetadata.path("full_name").asText(null),
                         userMetadata.path("name").asText(null),
                         userMetadata.path("display_name").asText(null)
-                )
-        );
+                ), null
+                );
     }
 
     // ═════════════════════════════════════════════════════════════════
@@ -157,12 +197,32 @@ public class SupabaseDbService {
     // ═════════════════════════════════════════════════════════════════
 
 
-    public void insertHotelBooking(Map<String, Object> booking) {
-        restClient.post()
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> insertHotelBooking(Map<String, Object> booking) {
+        List<Map<String, Object>> result = restClient.post()
                 .uri("/hotel_bookings")
+                .header("Prefer", "return=representation")
                 .body(List.of(booking))
                 .retrieve()
-                .toBodilessEntity();
+                .body(List.class);
+
+        return (result == null || result.isEmpty()) ? null : result.get(0);
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // RESTAURANT_RESERVATIONS
+    // ═════════════════════════════════════════════════════════════════
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> insertRestaurantReservation(Map<String, Object> reservation) {
+        List<Map<String, Object>> result = restClient.post()
+                .uri("/restaurant_reservations")
+                .header("Prefer", "return=representation")
+                .body(List.of(reservation))
+                .retrieve()
+                .body(List.class);
+
+        return (result == null || result.isEmpty()) ? null : result.get(0);
     }
 
     // ═════════════════════════════════════════════════════════════════
