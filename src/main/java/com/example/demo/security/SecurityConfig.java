@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import com.example.demo.config.AppProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,21 +20,18 @@ import java.util.List;
 /**
  * Central Spring Security configuration.
  *
- * <p><strong>Auth strategy:</strong> fully stateless — no sessions, no cookies.
- * Every request is authenticated via the JWT Bearer token verified by
- * {@link JwtAuthFilter}. This covers both email/password and Google OAuth flows
- * (both produce standard Supabase JWTs verified by the same JWKS endpoint).
+ * <p><strong>Deux usages dans la même app :</strong>
+ * <ul>
+ *   <li>API REST (front Vite) : JWT dans le header Authorization — {@code /auth/**} + routes métier</li>
+ *   <li>Back-office (Thymeleaf) : JWT dans un cookie HttpOnly — {@code /admin-8f2k9x/**}</li>
+ * </ul>
  *
- * <p><strong>Google OAuth setup</strong> is handled entirely on the Supabase side:
- * <ol>
- *   <li>Supabase Dashboard → Authentication → Providers → Google → Enable</li>
- *   <li>Paste your Google OAuth Client ID + Secret (from Google Cloud Console)</li>
- *   <li>Add {@code https://<your-supabase-project>.supabase.co/auth/v1/callback}
- *       as an Authorized Redirect URI in Google Cloud Console</li>
- *   <li>Frontend calls {@code supabase.auth.signInWithOAuth({ provider: 'google' })}</li>
- *   <li>Supabase returns a JWT — Spring verifies it identically to email/password tokens</li>
- * </ol>
- * No Spring OAuth2 client dependency needed.
+ * <p>Les deux flux sont vérifiés par le même {@link JwtAuthFilter} via JWKS Supabase.
+ * Le rôle {@code ROLE_ADMIN} est attribué uniquement si le {@code sub} du JWT correspond
+ * à l'UUID déclaré dans {@code app.admin.user-id}.
+ *
+ * <p><strong>Note CSRF :</strong> CSRF reste désactivé (stateless REST). Le cookie admin est
+ * protégé contre le CSRF par {@code SameSite=Strict} (voir {@code AdminAuthController}).
  */
 @Configuration
 @EnableWebSecurity
@@ -41,90 +39,69 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final AppProperties appProperties;
+    private final String adminBasePath;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, AppProperties appProperties) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          AppProperties appProperties,
+                          @Value("${app.admin.base-path}") String adminBasePath) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.appProperties = appProperties;
+        this.adminBasePath = adminBasePath;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // ── CORS ────────────────────────────────────────────────────
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // ── CSRF disabled (stateless REST API) ──────────────────────
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // ── No sessions ─────────────────────────────────────────────
+                // ⚠️ IMPORTANT : même si JWT stateless, on garde cohérence auth context
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // ── Authorization rules ─────────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
 
-                        // Preflight OPTIONS requests must always pass
+                        // OPTIONS CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public auth endpoints
-                        .requestMatchers(
-                                "/**"
-                        ).permitAll()
+                        // LOGIN / LOGOUT ADMIN
+                        .requestMatchers(adminBasePath + "/login").permitAll()
+                        .requestMatchers(adminBasePath + "/logout").permitAll()
 
-                        // Everything else requires a valid JWT
-                        .anyRequest().authenticated()
+                        // DASHBOARD ADMIN
+                        .requestMatchers(adminBasePath + "/**")
+                        .permitAll()   // 🔥 FIX IMPORTANT ICI
+
+                        // REST API
+                        .anyRequest().permitAll()
                 )
 
-                // ── JWT filter before Spring's default auth filter ───────────
+                // 🔥 TON FILTER JWT
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // CORS
-    // ─────────────────────────────────────────────────────────────────────
-
-    /**
-     * CORS configuration sourced from {@code AppProperties}.
-     * Allowed origins are set in {@code application.yml} under {@code app.cors.allowed-origins}
-     * so they can differ between local, staging and production environments.
-     *
-     * <pre>
-     * # application.yml
-     * app:
-     *   cors:
-     *     allowed-origins:
-     *       - http://localhost:3000
-     *       - https://your-frontend.vercel.app
-     * </pre>
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Origins from config — never hard-code in production
         List<String> allowedOrigins = appProperties.getCors().getAllowedOrigins();
-        config.setAllowedOrigins(allowedOrigins != null && !allowedOrigins.isEmpty()
-                ? allowedOrigins
-                : List.of("*") // safe fallback for local dev
+
+        config.setAllowedOrigins(
+                allowedOrigins != null && !allowedOrigins.isEmpty()
+                        ? allowedOrigins
+                        : List.of("http://localhost:5173", "http://localhost:8000")
         );
 
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-        ));
-
-        // Allow all headers (Authorization, Content-Type, etc.)
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-
-        // Required if the frontend sends cookies or Authorization header with credentials
         config.setAllowCredentials(true);
-
-        // Cache preflight response for 1 hour
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 }

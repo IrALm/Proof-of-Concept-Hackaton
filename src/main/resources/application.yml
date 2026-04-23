@@ -16,6 +16,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
   ai:
     openai:
       api-key: ${GROQ_API_KEY}
@@ -24,6 +25,18 @@ spring:
         options:
           model: ${GROQ_MODEL:llama-3.1-8b-instant}
           temperature: 0.35
+
+  # ─── Upload CSV (back-office) ──────────────────────────────────────
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 25MB
+
+  # ─── Thymeleaf (back-office) ───────────────────────────────────────
+  thymeleaf:
+    cache: ${THYMELEAF_CACHE:true}   # false en dev, true en prod (défaut)
+    prefix: classpath:/templates/
+    suffix: .html
 
 app:
   supabase:
@@ -38,9 +51,19 @@ app:
   pexels:
     api-key: ${PEXELS_API_KEY}
 
+  # ─── Back-office admin ─────────────────────────────────────────────
+  admin:
+    user-id: ${ADMIN_USER_ID}
+    base-path: /admin-8f2k9x
+
+  cookie:
+    secure: ${APP_COOKIE_SECURE:false}
+    same-site: ${APP_COOKIE_SAME_SITE:Lax}
+    max-age: 1209600
   api:
     url: ${API_URL}
+
   cors:
     allowed-origins:
-      - http://localhost:5173          # dev local
-      - https://ton-app.vercel.app     # production
+      - http://localhost:5173
+      - https://ton-app.vercel.app

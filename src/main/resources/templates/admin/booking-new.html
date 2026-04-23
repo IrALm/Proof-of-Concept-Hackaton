@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nouvelle réservation — Back Office</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900">
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="max-w-4xl mx-auto px-6 py-10">
+
+  <a th:href="${basePath}" class="text-sm text-gray-500 hover:text-gray-900 mb-4 inline-block">
+    ← Dashboard
+  </a>
+
+  <h1 class="text-3xl font-bold mb-2">📝 Nouvelle réservation</h1>
+  <p class="text-gray-600 mb-8">
+    Créer manuellement une entrée dans <code>hotel_bookings</code>.
+    L'hôtel est sélectionné parmi ceux déjà existants.
+  </p>
+
+  <div th:if="${success}" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6 text-sm"
+       th:text="${success}"></div>
+  <div th:if="${error}" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-sm"
+       th:text="${error}"></div>
+
+  <form th:action="${basePath} + '/bookings'" method="post" th:object="${form}"
+        class="bg-white rounded-xl p-6 border border-gray-200 space-y-6">
+
+    <!-- ─── HÔTEL ─── -->
+    <section>
+      <h2 class="text-lg font-semibold mb-3 pb-2 border-b">Hôtel</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-3">
+          <label class="block text-sm font-medium mb-1">Hôtel</label>
+          <select th:field="*{hotel}" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">— Sélectionner —</option>
+            <option th:each="h : ${hotels}"
+                    th:value="${h.name}"
+                    th:text="${h.name + ' (' + (h.country ?: '—') + ')'}"></option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Pays (optionnel)</label>
+          <input type="text" th:field="*{country}" maxlength="3"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Segment marché</label>
+          <input type="text" th:field="*{marketSegment}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ARRIVÉE ─── -->
+    <section>
+      <h2 class="text-lg font-semibold mb-3 pb-2 border-b">Arrivée</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Lead time</label>
+          <input type="number" th:field="*{leadTime}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Année</label>
+          <input type="number" th:field="*{arrivalDateYear}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Mois</label>
+          <input type="text" th:field="*{arrivalDateMonth}" placeholder="January"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">N° semaine</label>
+          <input type="number" th:field="*{arrivalDateWeekNumber}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Jour</label>
+          <input type="number" th:field="*{arrivalDateDayOfMonth}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SÉJOUR ─── -->
+    <section>
+      <h2 class="text-lg font-semibold mb-3 pb-2 border-b">Séjour</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nuits week-end</label>
+          <input type="number" th:field="*{staysInWeekendNights}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Nuits semaine</label>
+          <input type="number" th:field="*{staysInWeekNights}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Adultes</label>
+          <input type="number" th:field="*{adults}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Enfants</label>
+          <input type="number" th:field="*{children}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Bébés</label>
+          <input type="number" th:field="*{babies}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DÉTAILS ─── -->
+    <section>
+      <h2 class="text-lg font-semibold mb-3 pb-2 border-b">Détails</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Repas</label>
+          <select th:field="*{meal}" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="BB">BB (Bed & Breakfast)</option>
+            <option value="HB">HB (Half Board)</option>
+            <option value="FB">FB (Full Board)</option>
+            <option value="SC">SC (Self Catering)</option>
+            <option value="Undefined">Non défini</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Canal</label>
+          <select th:field="*{distributionChannel}" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="Direct">Direct</option>
+            <option value="Corporate">Corporate</option>
+            <option value="TA/TO">TA/TO</option>
+            <option value="GDS">GDS</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Type client</label>
+          <select th:field="*{customerType}" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="Transient">Transient</option>
+            <option value="Contract">Contract</option>
+            <option value="Group">Group</option>
+            <option value="Transient-Party">Transient-Party</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Chambre réservée</label>
+          <input type="text" th:field="*{reservedRoomType}" maxlength="5"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Chambre assignée</label>
+          <input type="text" th:field="*{assignedRoomType}" maxlength="5"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">ADR (€/nuit)</label>
+          <input type="number" step="0.01" th:field="*{adr}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Parkings requis</label>
+          <input type="number" th:field="*{requiredCarParkingSpaces}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Demandes spéciales</label>
+          <input type="number" th:field="*{totalOfSpecialRequests}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Type de dépôt</label>
+          <select th:field="*{depositType}" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="No Deposit">Aucun</option>
+            <option value="Non Refund">Non remboursable</option>
+            <option value="Refundable">Remboursable</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── STATUT ─── -->
+    <section>
+      <h2 class="text-lg font-semibold mb-3 pb-2 border-b">Statut</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Statut réservation</label>
+          <select th:field="*{reservationStatus}" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="Check-Out">Check-Out</option>
+            <option value="Canceled">Canceled</option>
+            <option value="No-Show">No-Show</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Date statut</label>
+          <input type="date" th:field="*{reservationStatusDate}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div class="flex items-end gap-4 md:col-span-3">
+          <label class="inline-flex items-center">
+            <input type="checkbox" th:field="*{isCanceled}" class="mr-2">
+            <span class="text-sm">Annulée</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="checkbox" th:field="*{isRepeatedGuest}" class="mr-2">
+            <span class="text-sm">Client fidèle</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SUBMIT ─── -->
+    <div class="pt-4 flex gap-3">
+      <button type="submit"
+              class="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition">
+        Créer la réservation
+      </button>
+      <a th:href="${basePath}"
+         class="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:text-gray-900">
+        Annuler
+      </a>
+    </div>
+
+  </form>
+
+</main>
+</body>
+</html>
