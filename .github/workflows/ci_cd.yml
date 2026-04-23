@@ -47,17 +47,40 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      # 🔥 VARIABLES D'ENV COMPLÈTES POUR SPRING
       - name: Set ENV
         run: |
+          # ───── DB ─────
           echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/test_db" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=test" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=test" >> $GITHUB_ENV
+
           echo "SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop" >> $GITHUB_ENV
           echo "SPRING_FLYWAY_ENABLED=false" >> $GITHUB_ENV
+
+          # ───── AI / GROQ ─────
           echo "GROQ_API_KEY=fake-key-for-ci" >> $GITHUB_ENV
+
+          # ───── SUPABASE ─────
           echo "SUPABASE_URL=https://fake.supabase.co" >> $GITHUB_ENV
           echo "SUPABASE_SERVICE_KEY=fake-service-key" >> $GITHUB_ENV
           echo "SUPABASE_ANON_KEY=fake-anon-key" >> $GITHUB_ENV
+
+          # ───── APP CONFIG (AppProperties) ─────
+          echo "API_URL=http://localhost:8080" >> $GITHUB_ENV
+
+          echo "ADMIN_USER_ID=ci-admin" >> $GITHUB_ENV
+          echo "ADMIN_BASE_PATH=/admin-8f2k9x" >> $GITHUB_ENV
+
+          # ───── COOKIE ─────
+          echo "APP_COOKIE_SECURE=false" >> $GITHUB_ENV
+          echo "APP_COOKIE_SAME_SITE=Lax" >> $GITHUB_ENV
+
+          # ───── THYMELEAF ─────
+          echo "THYMELEAF_CACHE=false" >> $GITHUB_ENV
+
+          # ───── CORS ─────
+          echo "CORS_ALLOWED_ORIGINS=http://localhost:5173" >> $GITHUB_ENV
 
       - name: Build
         run: mvn clean install -DskipTests
@@ -67,6 +90,7 @@ jobs:
 
       - name: Docker build
         run: docker build -t app-ci-test .
+
   cd:
     name: 🚀 Deploy to Render
     runs-on: ubuntu-latest
