@@ -17,22 +17,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Central Spring Security configuration.
- *
- * <p><strong>Deux usages dans la même app :</strong>
- * <ul>
- *   <li>API REST (front Vite) : JWT dans le header Authorization — {@code /auth/**} + routes métier</li>
- *   <li>Back-office (Thymeleaf) : JWT dans un cookie HttpOnly — {@code /admin-8f2k9x/**}</li>
- * </ul>
- *
- * <p>Les deux flux sont vérifiés par le même {@link JwtAuthFilter} via JWKS Supabase.
- * Le rôle {@code ROLE_ADMIN} est attribué uniquement si le {@code sub} du JWT correspond
- * à l'UUID déclaré dans {@code app.admin.user-id}.
- *
- * <p><strong>Note CSRF :</strong> CSRF reste désactivé (stateless REST). Le cookie admin est
- * protégé contre le CSRF par {@code SameSite=Strict} (voir {@code AdminAuthController}).
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -52,31 +36,34 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // CSRF désactivé (API stateless JWT)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // ⚠️ IMPORTANT : même si JWT stateless, on garde cohérence auth context
+                // Stateless session
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // OPTIONS CORS
+                        // IMPORTANT : preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // LOGIN / LOGOUT ADMIN
+                        // AUTH ADMIN
                         .requestMatchers(adminBasePath + "/login").permitAll()
                         .requestMatchers(adminBasePath + "/logout").permitAll()
 
-                        // DASHBOARD ADMIN
-                        .requestMatchers(adminBasePath + "/**")
-                        .permitAll()   // 🔥 FIX IMPORTANT ICI
+                        // ADMIN DASHBOARD
+                        .requestMatchers(adminBasePath + "/**").permitAll()
 
-                        // REST API
+                        // API REST
                         .anyRequest().permitAll()
                 )
 
-                // 🔥 TON FILTER JWT
+                // JWT filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -84,20 +71,29 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
 
+        // Origins autorisées (prod + local + Render)
         List<String> allowedOrigins = appProperties.getCors().getAllowedOrigins();
 
-        config.setAllowedOrigins(
-                allowedOrigins != null && !allowedOrigins.isEmpty()
-                        ? allowedOrigins
-                        : List.of("http://localhost:5173", "http://localhost:8000")
-        );
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "http://localhost:8000",
+                "https://*.onrender.com"
+        ));
+
+        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+            config.setAllowedOrigins(allowedOrigins);
+        }
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
+
+        // utile pour JWT si besoin côté front
+        config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
