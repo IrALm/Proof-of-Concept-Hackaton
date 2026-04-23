@@ -286,17 +286,16 @@ public class SupabaseDbService {
     @SuppressWarnings("unchecked")
     public Map<String, Object> addRestaurantReview(String reservationId, String avis) {
 
-        // 1. check autorisation
         if (!canUserLeaveRestaurantReview(reservationId)) {
             throw new IllegalStateException("Impossible de laisser un avis avant la date de réservation");
         }
 
-        // 2. update avis dans Supabase
         List<Map<String, Object>> result = restClient.patch()
                 .uri(uriBuilder -> uriBuilder
                         .path("/restaurant_reservations")
                         .queryParam("id", "eq." + reservationId)
                         .build())
+                .header("Prefer", "return=representation") // 🔥 IMPORTANT
                 .body(Map.of("avis", avis))
                 .retrieve()
                 .body(List.class);
@@ -332,7 +331,6 @@ public class SupabaseDbService {
 
         return reservationDate.isBefore(today);
     }
-
     @SuppressWarnings("unchecked")
     public Map<String, Object> addHotelReview(String bookingId, String avis) {
 
@@ -345,6 +343,7 @@ public class SupabaseDbService {
                         .path("/hotel_bookings")
                         .queryParam("id", "eq." + bookingId)
                         .build())
+                .header("Prefer", "return=representation") // 🔥 indispensable
                 .body(Map.of("avis", avis))
                 .retrieve()
                 .body(List.class);
