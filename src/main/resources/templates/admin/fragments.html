@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle} ?: 'Back Office'">Back Office</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <th:block th:fragment="head"></th:block>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900">
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav th:fragment="navbar" class="bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-8">
+      <a th:href="${basePath}" class="text-xl font-bold text-gray-900">
+        🛠️ Back Office
+      </a>
+      <div class="flex gap-6 text-sm">
+        <a th:href="${basePath}" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+        <a th:href="${basePath} + '/restaurants/import'" class="text-gray-600 hover:text-gray-900">Restaurants</a>
+        <a th:href="${basePath} + '/hotels/import'" class="text-gray-600 hover:text-gray-900">Hôtels</a>
+        <a th:href="${basePath} + '/bookings/new'" class="text-gray-600 hover:text-gray-900">Nouvelle résa</a>
+      </div>
+    </div>
+    <form th:action="${basePath} + '/logout'" method="post" class="m-0">
+      <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium">
+        Déconnexion
+      </button>
+    </form>
+  </div>
+</nav>
+
+</body>
+</html>

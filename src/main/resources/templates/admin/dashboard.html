@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard — Back Office</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900">
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="max-w-7xl mx-auto px-6 py-10">
+
+  <h1 class="text-3xl font-bold mb-2">Bienvenue sur le back office</h1>
+  <p class="text-gray-600 mb-10">Gérez vos restaurants, hôtels et réservations.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <a th:href="${basePath} + '/restaurants/import'"
+       class="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-900 hover:shadow-md transition">
+      <div class="text-4xl mb-3">🍽️</div>
+      <h2 class="text-lg font-semibold mb-1">Importer restaurants</h2>
+      <p class="text-sm text-gray-600">Uploader un CSV Michelin.</p>
+    </a>
+
+    <a th:href="${basePath} + '/hotels/import'"
+       class="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-900 hover:shadow-md transition">
+      <div class="text-4xl mb-3">🏨</div>
+      <h2 class="text-lg font-semibold mb-1">Importer hôtels</h2>
+      <p class="text-sm text-gray-600">CSV réservations → crée hôtels + bookings.</p>
+    </a>
+
+    <a th:href="${basePath} + '/bookings/new'"
+       class="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-900 hover:shadow-md transition">
+      <div class="text-4xl mb-3">📝</div>
+      <h2 class="text-lg font-semibold mb-1">Nouvelle réservation</h2>
+      <p class="text-sm text-gray-600">Créer manuellement une réservation.</p>
+    </a>
+
+  </div>
+</main>
+
+</body>
+</html>

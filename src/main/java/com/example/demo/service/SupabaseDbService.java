@@ -29,6 +29,10 @@ public class SupabaseDbService {
                 .build();
     }
 
+    // ═════════════════════════════════════════════════════════════════
+    // USERS
+    // ═════════════════════════════════════════════════════════════════
+
     public void insertUser(String id, String email, String fullName) {
         restClient.post()
                 .uri("/users")
@@ -64,16 +68,6 @@ public class SupabaseDbService {
         );
     }
 
-    /**
-     * Persists the user's AI-generated preferences into the {@code preferences} JSONB column.
-     *
-     * <p>Uses a PATCH with a PostgREST filter on {@code id} so only the target row
-     * is updated. Spring's RestClient serializes {@link AiProfilePreferencesDto}
-     * to a nested JSON object, which Supabase stores as-is in the JSONB column.
-     *
-     * @param userId      the user's UUID (from Supabase auth)
-     * @param preferences the structured preferences to persist
-     */
     public void updatePreferences(String userId, AiProfilePreferencesDto preferences) {
         restClient.patch()
                 .uri(uriBuilder -> uriBuilder
@@ -118,6 +112,62 @@ public class SupabaseDbService {
                 )
         );
     }
+
+    // ═════════════════════════════════════════════════════════════════
+    // RESTAURANTS (back-office)
+    // ═════════════════════════════════════════════════════════════════
+
+    public void insertRestaurantsBatch(List<Map<String, Object>> batch) {
+        restClient.post()
+                .uri("/restaurants")
+                .body(batch)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // HOTELS (back-office)
+    // ═════════════════════════════════════════════════════════════════
+
+    public void insertHotel(Map<String, Object> hotel) {
+        restClient.post()
+                .uri("/hotels")
+                .body(hotel)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    /**
+     * Liste des hôtels pour alimenter le dropdown du formulaire de booking.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> findAllHotels() {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/hotels")
+                        .queryParam("select", "id,name,country,market_segment")
+                        .queryParam("order", "name.asc")
+                        .build())
+                .retrieve()
+                .body(List.class);
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // HOTEL_BOOKINGS (back-office)
+    // ═════════════════════════════════════════════════════════════════
+
+
+    public void insertHotelBooking(Map<String, Object> booking) {
+        restClient.post()
+                .uri("/hotel_bookings")
+                .body(List.of(booking))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // Helpers
+    // ═════════════════════════════════════════════════════════════════
 
     private String valueAsString(Object value) {
         return value == null ? null : value.toString();
