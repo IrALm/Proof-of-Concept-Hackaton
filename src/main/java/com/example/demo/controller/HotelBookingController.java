@@ -66,5 +66,33 @@ public class HotelBookingController {
         return db.findHotelBookingsByEmail(email);
     }
 
+    // 🔍 vérifier si avis possible
+    @GetMapping("/can-review/{bookingId}")
+    public ResponseEntity<Boolean> canLeaveReview(@PathVariable String bookingId) {
+
+        boolean canReview = db.canUserLeaveHotelReview(bookingId);
+
+        return ResponseEntity.ok(canReview);
+    }
+
+    // ⭐ ajouter avis hôtel
+    @PatchMapping("/{bookingId}")
+    public ResponseEntity<Map<String, Object>> addReview(
+            @PathVariable String bookingId,
+            @RequestBody Map<String, String> body
+    ) {
+
+        String avis = body.get("avis");
+
+        Map<String, Object> updated =
+                db.addHotelReview(bookingId, avis);
+
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updated);
+    }
+
     private static int nz(Integer v) { return v == null ? 0 : v; }
 }

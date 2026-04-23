@@ -53,4 +53,32 @@ public class RestaurantReservationController {
     public List<Map<String, Object>> getBookingsByEmail(@RequestParam String email) {
         return db.findRestaurantReservationsByEmail(email);
     }
+
+    // 🔍 Vérifier si l’utilisateur peut laisser un avis
+    @GetMapping("/can-review/{reservationId}")
+    public ResponseEntity<Boolean> canLeaveReview(@PathVariable String reservationId) {
+
+        boolean canReview = db.canUserLeaveRestaurantReview(reservationId);
+
+        return ResponseEntity.ok(canReview);
+    }
+
+    // ⭐ Ajouter un avis (si autorisé)
+    @PatchMapping("/{reservationId}")
+    public ResponseEntity<Map<String, Object>> addReview(
+            @PathVariable String reservationId,
+            @RequestBody Map<String, String> body
+    ) {
+
+        String avis = body.get("avis");
+
+        Map<String, Object> updated =
+                db.addRestaurantReview(reservationId, avis);
+
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updated);
+    }
 }

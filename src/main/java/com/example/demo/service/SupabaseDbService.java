@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -248,6 +249,107 @@ public class SupabaseDbService {
                         .build())
                 .retrieve()
                 .body(List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean canUserLeaveRestaurantReview(String reservationId) {
+
+        // 1. récupérer la réservation
+        List<Map<String, Object>> result = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/restaurant_reservations")
+                        .queryParam("id", "eq." + reservationId)
+                        .queryParam("select", "reservation_date")
+                        .build())
+                .retrieve()
+                .body(List.class);
+
+        if (result == null || result.isEmpty()) {
+            return false;
+        }
+
+        // 2. extraire la date
+        String dateStr = (String) result.get(0).get("reservation_date");
+
+        if (dateStr == null) {
+            return false;
+        }
+
+        // 3. comparer avec aujourd'hui
+        LocalDate reservationDate = LocalDate.parse(dateStr);
+        LocalDate today = LocalDate.now();
+
+        // 4. règle métier : avis autorisé seulement si date passée
+        return reservationDate.isBefore(today);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> addRestaurantReview(String reservationId, String avis) {
+
+        // 1. check autorisation
+        if (!canUserLeaveRestaurantReview(reservationId)) {
+            throw new IllegalStateException("Impossible de laisser un avis avant la date de réservation");
+        }
+
+        // 2. update avis dans Supabase
+        List<Map<String, Object>> result = restClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/restaurant_reservations")
+                        .queryParam("id", "eq." + reservationId)
+                        .build())
+                .body(Map.of("avis", avis))
+                .retrieve()
+                .body(List.class);
+
+        return (result == null || result.isEmpty()) ? null : result.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean canUserLeaveHotelReview(String bookingId) {
+
+        // 1. récupérer la réservation hôtel
+        List<Map<String, Object>> result = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/hotel_bookings")
+                        .queryParam("id", "eq." + bookingId)
+                        .queryParam("select", "reservation_status_date")
+                        .build())
+                .retrieve()
+                .body(List.class);
+
+        if (result == null || result.isEmpty()) {
+            return false;
+        }
+
+        String dateStr = (String) result.get(0).get("reservation_status_date");
+
+        if (dateStr == null) {
+            return false;
+        }
+
+        LocalDate reservationDate = LocalDate.parse(dateStr);
+        LocalDate today = LocalDate.now();
+
+        return reservationDate.isBefore(today);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> addHotelReview(String bookingId, String avis) {
+
+        if (!canUserLeaveHotelReview(bookingId)) {
+            throw new IllegalStateException("Impossible de laisser un avis avant la fin de la réservation");
+        }
+
+        List<Map<String, Object>> result = restClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/hotel_bookings")
+                        .queryParam("id", "eq." + bookingId)
+                        .build())
+                .body(Map.of("avis", avis))
+                .retrieve()
+                .body(List.class);
+
+        return (result == null || result.isEmpty()) ? null : result.get(0);
     }
 
     // ═════════════════════════════════════════════════════════════════
