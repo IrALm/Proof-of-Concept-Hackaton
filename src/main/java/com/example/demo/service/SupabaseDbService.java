@@ -4,18 +4,13 @@ import com.example.demo.config.AppProperties;
 import com.example.demo.dto.AiProfilePreferencesDto;
 import com.example.demo.dto.UserProfileDto;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
 
-@Profile("!test")
 @Service
 public class SupabaseDbService {
 

@@ -55,6 +55,9 @@ jobs:
           echo "SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop" >> $GITHUB_ENV
           echo "SPRING_FLYWAY_ENABLED=false" >> $GITHUB_ENV
           echo "GROQ_API_KEY=fake-key-for-ci" >> $GITHUB_ENV
+          echo "SUPABASE_URL=https://fake.supabase.co" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_KEY=fake-service-key" >> $GITHUB_ENV
+          echo "SUPABASE_ANON_KEY=fake-anon-key" >> $GITHUB_ENV
 
       - name: Build
         run: mvn clean install -DskipTests
